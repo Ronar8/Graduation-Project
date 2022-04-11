@@ -5,12 +5,15 @@ from cvzone.PlotModule import LivePlot
 
 # Capture video from webcam (0 - default), resolution: 1920x1080
 cap = cv2.VideoCapture(0)
-cap.set(3, 1920)
-cap.set(4, 1080)
+cap.set(3, 1280)
+cap.set(4, 720)
 
 # Initialize detector and plot for blinking
 detector = FaceMeshDetector(maxFaces=1)
 blink_plot = LivePlot(640, 360, [0, 52], invert=True)
+
+# Initialize FPS counter
+fpsReader = cvzone.FPS()
 
 # List to highlight eye landmarks with purple color
 left_eye_landmarks = [33, 7, 246, 163, 161, 144, 160, 145, 159, 153, 158, 154, 157, 155, 173, 133]
@@ -32,6 +35,7 @@ wait_next_5_frames = False
 
 while True:
     success, img = cap.read()
+    fps, img = fpsReader.update(img, pos=(50, 30), color=(0, 255, 0), scale=2, thickness=2)
     img, faces = detector.findFaceMesh(img)
 
     if faces:
@@ -84,7 +88,7 @@ while True:
             frame_counter = 0
             wait_next_5_frames = True
 
-        if eye_shut_time > 100:
+        if eye_shut_time > 50:
             print("UWAGA! Ryzyko zasniecia wysokie")
 
         # Adds 1 to counter and changes color when user blinks
@@ -99,8 +103,8 @@ while True:
             eye_shut = False
 
         # Display blink counter, top-left position
-        cvzone.putTextRect(img, f'Blink count: {blink_counter}', (50, 100))
-        cvzone.putTextRect(img, f'Eye-shut time: {eye_shut_time}', (50, 200))
+        cvzone.putTextRect(img, f'Blink count: {blink_counter}', (50, 80))
+        cvzone.putTextRect(img, f'Eye-shut time: {eye_shut_time}', (50, 160))
 
         ratioAvg = (ratioAvg_left + ratioAvg_right) / 2
 
